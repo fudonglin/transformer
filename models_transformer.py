@@ -38,7 +38,7 @@ class PositionalEncoding(nn.Module):
         _, N, _ = x.shape
         pos_embed = self.pe[:, :N, :].to(x.device)
 
-        return pos_embed
+        return x + pos_embed
 
 
 class MultiHeadAttention(nn.Module):
