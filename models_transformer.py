@@ -32,7 +32,7 @@ class PositionalEncoding(nn.Module):
         """
         Forward pass to get positional encoding for the input tensor.
         :param x: input tensor of shape (batch_size, seq_len, d_model).
-        :return: positional encoding tensor of shape (1, seq_len, d_model).
+        :return: sum of input and positional encoding  tensors, with its shape (1, seq_len, d_model).
         """
 
         _, N, _ = x.shape
@@ -42,11 +42,12 @@ class PositionalEncoding(nn.Module):
 
 
 class MultiHeadAttention(nn.Module):
+
     def __init__(self, d_model, num_heads):
         """
-               Multi-Head Attention as described in "Attention is All You Need" paper.
-               :param d_model: dimension of the model (embedding size).
-               :param num_heads: number of attention heads.
+            Multi-Head Attention as described in "Attention is All You Need" paper.
+            :param d_model: dimension of the model (embedding size).
+            :param num_heads: number of attention heads.
         """
 
         super().__init__()
@@ -63,10 +64,12 @@ class MultiHeadAttention(nn.Module):
 
     def forward(self, q, k, v, mask=None):
         """
-               Forward pass through the multi-head attention block.
-               :param x: input tensor of shape (batch_size, seq_len, d_model).
-               :param mask: attention mask to prevent attending to certain positions (optional).
-               :return: output tensor of shape (batch_size, seq_len, d_model).
+            Forward pass through the multi-head attention block.
+            :param q: query tensor of shape (batch_size, seq_len, d_model).
+            :param k: key tensor of shape (batch_size, seq_len, d_model).
+            :param v: value tensor of shape (batch_size, seq_len, d_model).
+            :param mask: attention mask to prevent attending to certain positions (optional).
+            :return: output tensor of shape (batch_size, seq_len, d_model).
         """
 
         B, T_q, _ = q.size()
