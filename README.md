@@ -1,11 +1,42 @@
 # Implement Transformers from Scratch
 
-
-![MHA](https://github.com/fudonglin/transformer/blob/main/images/transformers.png?raw=true)
-
+This repository provides an **unofficial PyTorch implementation of the Transformer architecture**. Before diving into the code, I highly recommend revisiting the original paper, [Attention Is All You Need](https://arxiv.org/pdf/1706.03762), as well as my [blog post](https://fudonglin.github.io/2025/07/04/transformer.html), which offers a step-by-step explanation of how Transformers work.
 
 
-## Positional Embedding
+
+## Overview
+
+![Transformer](https://github.com/fudonglin/transformer/blob/main/images/transformers.png?raw=t)
+
+Figure 1: The model architecture of Transformer.
+
+
+
+Following the original paper, this repository implements the Transformer architecture for machine translation. As an example, we translate the Chinese sentence `"纽约是一座城市"` to its English equivalent, `"New York is a city"`.
+
+Figure 1 illustrates the overall model architecture, which consists of three key components: the **Encoder**, the **Decoder**, and **Positional Encoding**.
+
+- The **Encoder** includes **Multi-Head Self-Attention** and **Feed-Forward** layers. Its goal is to learn contextual representations from the source language (Chinese in this case).
+- The **Decoder** comprises three parts:
+  1. **Masked Multi-Head Self-Attention**, which ensures the autoregressive property during generation,
+  2. **Multi-Head Cross-Attention**, which captures the alignment between the source and target languages, and
+  3. A **Feed-Forward layer**, which introduces non-linearity and further transforms the learned features.
+- The **Positional Encoding** is used to incorporate explicit positional information into the Transformer model, enabling it to capture the order of tokens in a sequence.
+
+
+
+## Positional Encoding
+
+The Transformer architecture is **order-agnostic** by design. Its self-attention mechanism processes all tokens in parallel, with no inherent notion of sequence order. To address this limitation, **Positional Encoding** is introduced to explicitly encode the position of each token, allowing the model to capture the relative and absolute order of words in a sequence.
+
+There are two primary types of positional encodings: **fixed (non-learnable)** and **learnable** embeddings. In the original paper, the authors adopted **fixed sinusoidal positional encodings**. Specifically, they represented positional information using sine and cosine functions at varying frequencies:
+$$
+\begin{gathered}
+PE(pos, 2i) = \sin(\frac{pos}{10000^{2i/d_{\textrm{model}}}}), \\
+PE(pos, 2i+1) = \cos(\frac{pos}{10000^{2i/d_{\textrm{model}}}}).
+\end{gathered}
+$$
+Here, $pos$ denotes the position of a word (or token) in the sequence, $d\_{\textrm{model}}$ is the dimensionality of the model's embeddings (e.g., $d_{\textrm{model}} = 512$ used in the paper), and $i \in \{0, 1, 2, \dots, d_{\textrm{model}} - 1 \}$ indexes the embedding dimensions. 
 
 
 
@@ -31,7 +62,7 @@ class PositionalEncoding(nn.Module):
         # Fill odd-numbered dimension with cosine values
         pe[:, 1::2] = torch.cos(position * div_term)
 
-        # non-learnable buffer
+        # Non-learnable buffer
         self.register_buffer('pe', pe.unsqueeze(0))   # (1, max_len, d_model)
 
     def forward(self, x):
@@ -50,8 +81,6 @@ class PositionalEncoding(nn.Module):
 
 
 ## Multi-Head Attention
-
-
 
 ![MHA](https://github.com/fudonglin/transformer/blob/main/images/attention.png?raw=true)
 
