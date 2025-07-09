@@ -30,12 +30,16 @@ Figure 1 illustrates the overall model architecture, which consists of three key
 The Transformer architecture is **order-agnostic** by design. Its self-attention mechanism processes all tokens in parallel, with no inherent notion of sequence order. To address this limitation, **Positional Encoding** is introduced to explicitly encode the position of each token, allowing the model to capture the relative and absolute order of words in a sequence.
 
 There are two primary types of positional encodings: **fixed (non-learnable)** and **learnable** embeddings. In the original paper, the authors adopted **fixed sinusoidal positional encodings**. Specifically, they represented positional information using sine and cosine functions at varying frequencies:
-$$
+
+```math
 \begin{gathered}
 PE(pos, 2i) = \sin(\frac{pos}{10000^{2i/d_{\textrm{model}}}}), \\
 PE(pos, 2i+1) = \cos(\frac{pos}{10000^{2i/d_{\textrm{model}}}}).
 \end{gathered}
-$$
+```
+
+
+
 Here, $pos$ denotes the position of a word (or token) in the sequence, $d\_{\textrm{model}}$ is the dimensionality of the model's embeddings (e.g., $d_{\textrm{model}} = 512$ used in the paper), and $i \in \{0, 1, 2, \dots, d_{\textrm{model}} - 1 \}$ indexes the embedding dimensions. 
 
 
