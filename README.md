@@ -1,5 +1,7 @@
 # Implement Transformers from Scratch
-This is the pytorch implementation of Transformers.
+
+
+![MHA](https://github.com/fudonglin/transformer/blob/main/images/transformers.png?raw=true)
 
 
 
@@ -48,6 +50,10 @@ class PositionalEncoding(nn.Module):
 
 
 ## Multi-Head Attention
+
+
+
+![MHA](https://github.com/fudonglin/transformer/blob/main/images/attention.png?raw=true)
 
 
 
