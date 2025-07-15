@@ -1,6 +1,6 @@
 # Implement Transformers from Scratch
 
-This repository provides an **unofficial PyTorch implementation of the Transformer architecture**. Before diving into the code, I highly recommend revisiting the original paper, [Attention Is All You Need](https://arxiv.org/pdf/1706.03762), as well as my [blog post](https://fudonglin.github.io/2025/07/04/transformer.html), which offers a step-by-step explanation of how Transformers work.
+This repository offers an **unofficial PyTorch implementation of the Transformer architecture** from scratch. If you're new to Transformers or want a refresher, I highly recommend reading the original paper, [Attention Is All You Need](https://arxiv.org/pdf/1706.03762), as well as my previous [blog post](https://fudonglin.github.io/2025/07/04/transformer.html), which walks through each component step-by-step.
 
 
 
@@ -8,28 +8,28 @@ This repository provides an **unofficial PyTorch implementation of the Transform
 
 ![Transformer](https://github.com/fudonglin/transformer/blob/main/images/transformers.png?raw=t)
 
-Figure 1: The model architecture of Transformer.
+Figure 1: Transformer model architecture.
 
 
 
-Following the original paper, this repository implements the Transformer architecture for machine translation. As an example, we translate the Chinese sentence `"纽约是一座城市"` to its English equivalent, `"New York is a city"`.
+This repository implements the Transformer model for machine translation, following the original design. As an example task, we translate the Chinese sentence `"纽约是一座城市"` into its English equivalent: `"New York is a city"`.
 
-Figure 1 illustrates the overall model architecture, which consists of three key components: the **Encoder**, the **Decoder**, and **Positional Encoding**.
+Figure 1 highlights the three main building blocks of the model: **Positional Encoding**, **Encoder**, and **Decoder**:
 
-- The **Encoder** includes **Multi-Head Self-Attention** and **Feed-Forward** layers. Its goal is to learn contextual representations from the source language (Chinese in this case).
-- The **Decoder** comprises three parts:
-  1. **Masked Multi-Head Self-Attention**, which ensures the autoregressive property during generation,
-  2. **Multi-Head Cross-Attention**, which captures the alignment between the source and target languages, and
-  3. A **Feed-Forward layer**, which introduces non-linearity and further transforms the learned features.
-- The **Positional Encoding** is used to incorporate explicit positional information into the Transformer model, enabling it to capture the order of tokens in a sequence.
+- **Positional Encoding** adds order-awareness to the otherwise order-agnostic attention mechanism.
+- The **Encoder** contains **Multi-Head Self-Attention** and **Feedforward Networks**, learning contextual representations from the source language.
+- The **Decoder** comprises:
+  1. **Masked Multi-Head Self-Attention** to enforce autoregressive decoding,
+  2. **Cross-Attention** to align the source and target sequences,
+  3. A **Feedforward Network** to apply non-linear transformations and enhance representational power.
 
 
 
 ## Positional Encoding
 
-The Transformer architecture is **order-agnostic** by design. Its self-attention mechanism processes all tokens in parallel, with no inherent notion of sequence order. To address this limitation, **Positional Encoding** is introduced to explicitly encode the position of each token, allowing the model to capture the relative and absolute order of words in a sequence.
+Transformers are inherently **order-agnostic** because self-attention treats all tokens equally, regardless of position. To introduce sequence order, the authors use Positional Encoding, which encodes both relative and absolute position information using sinusoidal functions.
 
-There are two primary types of positional encodings: **fixed (non-learnable)** and **learnable** embeddings. In the original paper, the authors adopted **fixed sinusoidal positional encodings**. Specifically, they represented positional information using sine and cosine functions at varying frequencies:
+The original paper uses fixed, non-learnable encodings:
 
 ```math
 \begin{gathered}
@@ -37,8 +37,6 @@ PE(pos, 2i) = \sin(\frac{pos}{10000^{2i/d_{\textrm{model}}}}), \\
 PE(pos, 2i+1) = \cos(\frac{pos}{10000^{2i/d_{\textrm{model}}}}).
 \end{gathered}
 ```
-
-
 
 Here, $pos$ denotes the position of a word (or token) in the sequence, $d\_{\textrm{model}}$ is the dimensionality of the model's embeddings (e.g., $d_{\textrm{model}} = 512$ used in the paper), and $i \in \{0, 1, 2, \dots, d_{\textrm{model}} - 1 \}$ indexes the embedding dimensions. 
 
@@ -87,6 +85,18 @@ class PositionalEncoding(nn.Module):
 ## Multi-Head Attention
 
 ![MHA](https://github.com/fudonglin/transformer/blob/main/images/attention.png?raw=true)
+
+**Multi-Head Attention (MHA)** is designed to help the model capture different types of relationships between tokens (e.g., words) in a sequence. It enables the model to attend to information from multiple representation subspaces simultaneously:
+
+```math
+\begin{gathered}
+\text{MultiHead}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) = \text{Concat}(\text{head}_1, \dots, \text{head}_h) \mathbf{W}^O, \\
+\text{head}_i = \text{Attention}(\mathbf{Q} \mathbf{W}_i^Q, \mathbf{K} \mathbf{W}_i^K, \mathbf{V} \mathbf{W}_i^V), \\
+\text{Attention}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) = \text{softmax}\left( \frac{\mathbf{Q} \mathbf{K}^T}{\sqrt{d_k}} \right) \mathbf{V}.
+\end{gathered}
+```
+
+Here, $\mathbf{Q}$, $\mathbf{K}$, and $\mathbf{V}$ are the query, key, and value in the Attention. $\mathbf{W}^{Q}, \mathbf{W}^{K}, \mathbf{W}^{V}$,  and $\mathbf{W}^{O}$ are four learnable matrices.  $i$ denote the $i$-th attention head. $\sqrt{d_{k}}$  is a scale factor that helps produce a smoother distribution of attention weights.
 
 
 
@@ -152,6 +162,16 @@ class MultiHeadAttention(nn.Module):
 
 ## Position-wise Feedforward Network
 
+The **Position-wise Feedforward Network (FFN)** is applied to each token independently and identically. Unlike the attention mechanism, which enables interaction between tokens, the FFN introduces **non-linearity** and **depth**, allowing the model to learn more abstract features.
+
+> 🔍 The non-linearity — typically ReLU or GELU — is crucial; without it, the FFN would collapse into a single linear transformation, reducing its ability to capture complex patterns.
+
+```math
+\text{FFN}(\mathbf{x}) = \mathbf{W}_2 \cdot \phi(\mathbf{W}_1 \cdot \mathbf{x} + \mathbf{b}_1) + \mathbf{b}_2.
+```
+
+Here, $\mathbf{x}$ is the input token representation at a given position. $\mathbf{W}_{i}$ and $\mathbf{b}_{i}$ are the weights and bias at the $i$-th linear layer. $\phi ( \cdot )$ is the non-linear activation function, typically ReLU or GELU.
+
 
 
 ```python
@@ -180,6 +200,12 @@ class FeedForward(nn.Module):
 
 ## Encoder
 
+The **Encoder** learns a contextual representation of the input sequence. Each encoder layer consists of:
+
+- Multi-Head Self-Attention
+- Position-wise Feedforward Network
+- Residual Connections and Layer Normalization
+
 
 
 ```python
@@ -207,6 +233,12 @@ class EncoderLayer(nn.Module):
 
 
 ## Decoder
+
+The **Decoder** generates the target sequence, one token at a time, using both past predictions and encoded source representations. Each decoder layer contains:
+
+1. Masked Multi-Head Self-Attention (to prevent access to future tokens),
+2. Cross-Attention (to attend to the encoder output),
+3. Feedforward Network (for non-linear transformation).
 
 
 
@@ -249,9 +281,9 @@ class DecoderLayer(nn.Module):
 
 
 
-
-
 ## Transformer
+
+Finally, the **Transformer** class ties everything together — embedding, positional encoding, stacked encoder and decoder layers, and the final linear projection to the output vocabulary.
 
 
 
