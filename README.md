@@ -170,7 +170,7 @@ The **Position-wise Feedforward Network (FFN)** is applied to each token indepen
 \text{FFN}(\mathbf{x}) = \mathbf{W}_2 \cdot \phi(\mathbf{W}_1 \cdot \mathbf{x} + \mathbf{b}_1) + \mathbf{b}_2.
 ```
 
-Here, $\mathbf{x}$ is the input token representation at a given position. $\mathbf{W}_{i}$ and $\mathbf{b}_{i}$ are the weights and bias at the $i$-th linear layer. $\phi ( \cdot )$ is the non-linear activation function, typically ReLU or GELU.
+Here, $\mathbf{x}$ is the input token representation at a given position. $\mathbf{W}\_{i}$ and $\mathbf{b}\_{i}$ are the weights and bias at the $i$-th linear layer. $\phi ( \cdot )$ is the non-linear activation function, typically ReLU or GELU.
 
 
 
@@ -236,9 +236,9 @@ class EncoderLayer(nn.Module):
 
 The **Decoder** generates the target sequence, one token at a time, using both past predictions and encoded source representations. Each decoder layer contains:
 
-1. Masked Multi-Head Self-Attention (to prevent access to future tokens),
-2. Cross-Attention (to attend to the encoder output),
-3. Feedforward Network (for non-linear transformation).
+- Masked Multi-Head Self-Attention (to prevent access to future tokens),
+- Cross-Attention (to attend to the encoder output),
+- Feedforward Network (for non-linear transformation).
 
 
 
