@@ -3,7 +3,7 @@ from transformers import AutoTokenizer
 from models_transformer import Transformer
 
 
-def main_test():
+def main_work():
     # Load Qwen tokenizer
     tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen1.5-0.5B")
 
@@ -42,4 +42,4 @@ def main_test():
 
 
 if __name__ == '__main__':
-    main_test()
+    main_work()
